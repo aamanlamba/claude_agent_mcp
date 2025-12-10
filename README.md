@@ -19,8 +19,8 @@ The system consists of three main components:
 
 ```mermaid
 graph TD
-    User[User] <--> Agent[Agent (agent.py)]
-    Agent <-->|Model Context Protocol| MCPServer[MCP Server (server.py)]
+    User[User] <--> Agent["Agent (agent.py)"]
+    Agent <-->|Model Context Protocol| MCPServer["MCP Server (server.py)"]
     Agent <-->|HTTP / Beta API| Anthropic[Anthropic API]
     
     subgraph Local Tools
