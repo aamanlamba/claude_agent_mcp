@@ -52,12 +52,28 @@ async def run_agent():
                     
                     messages = [{"role": "user", "content": user_input}]
                     
-                    # Call Claude
-                    response = client.messages.create(
-                        model="claude-3-opus-20240229",
+                    # Prepare tools (MCP tools + Code Execution for Skills)
+                    all_tools = tool_definitions + [{
+                        "type": "code_execution_20250825",
+                        "name": "code_execution"
+                    }]
+
+                    # Call Claude with Beta Skills
+                    response = client.beta.messages.create(
+                        model="claude-sonnet-4-5-20250929",
                         max_tokens=1000,
+                        betas=["code-execution-2025-08-25", "skills-2025-10-02"],
+                        container={
+                            "skills": [
+                                {
+                                    "type": "anthropic",
+                                    "skill_id": "pptx",
+                                    "version": "latest"
+                                }
+                            ]
+                        },
                         messages=messages,
-                        tools=tool_definitions
+                        tools=all_tools
                     )
                     
                     # Process response
@@ -85,11 +101,21 @@ async def run_agent():
                                 })
                         
                          # Get follow-up response from Claude
-                        response_followup = client.messages.create(
-                             model="claude-3-opus-20240229",
+                        response_followup = client.beta.messages.create(
+                             model="claude-sonnet-4-5-20250929",
                              max_tokens=1000,
+                             betas=["code-execution-2025-08-25", "skills-2025-10-02"],
+                             container={
+                                "skills": [
+                                    {
+                                        "type": "anthropic",
+                                        "skill_id": "pptx",
+                                        "version": "latest"
+                                    }
+                                ]
+                             },
                              messages=messages,
-                             tools=tool_definitions
+                             tools=all_tools
                         )
                         print(f"Agent: {response_followup.content[0].text}")
 

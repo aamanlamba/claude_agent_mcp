@@ -41,6 +41,7 @@ def run_test():
             "Reverse the word 'testing'",
             "Generate a UUID",
             "Count words in 'The quick brown fox'",
+            "Create a 1-slide presentation about testing",
             "quit"
         ]
         
@@ -65,7 +66,7 @@ def run_test():
         passed_checks = 0
         
         start_time = time.time()
-        while time.time() - start_time < 45: # 45s timeout
+        while time.time() - start_time < 60: # 60s timeout (PPTX might take longer)
             line = process.stdout.readline()
             if not line:
                 break
@@ -94,12 +95,8 @@ def run_test():
                 write_input(inputs[2])
                 current_input_idx += 1
             
-            # Check for UUID (roughly) - looking for dashes and length
+            # Check for UUID (roughly) 
             if passed_checks == 2 and "Agent:" in line:
-                # UUID format: 8-4-4-4-12
-                # We'll just check for basic structure or "calling tool: generate_uuid" roughly
-                # But here we want to see the Agent's answer.
-                # Assuming the agent prints "Agent: <uuid>"
                 import re
                 if re.search(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', line):
                     print("Verified UUID generation!")
@@ -111,13 +108,26 @@ def run_test():
                  if "4" in line: # Expecting count of 4
                      print("Verified word count!")
                      passed_checks += 1
-                     write_input("quit")
-                     break
+                     write_input(inputs[4])
+                     current_input_idx += 1
+            
+            # Check for PPTX creation
+            # The output likely contains "I have created the presentation..." or similar.
+            # We also might see "[Agent] Calling tool: code_execution" if it uses code execution to utilize the skill?
+            # Or it might just return the result.
+            # Skills work by loading code and executing it.
+            # Let's check for "presentation" or "slide" in the response.
+            if passed_checks == 4 and "Agent:" in line:
+                if "presentation" in line.lower() or "slide" in line.lower():
+                    print("Verified PPTX creation response!")
+                    passed_checks += 1
+                    write_input("quit")
+                    break
                 
-        if passed_checks == 4:
-            print("SUCCESS: All tests passed (4/4).")
+        if passed_checks == 5:
+            print("SUCCESS: All tests passed (5/5).")
         else:
-            print(f"FAILURE: Only passed {passed_checks}/4 checks.")
+            print(f"FAILURE: Only passed {passed_checks}/5 checks.")
     except Exception as e:
         print(f"Test failed with exception: {e}")
     finally:
